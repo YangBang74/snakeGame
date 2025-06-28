@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, onBeforeUnmount, watch } from 'vue'
+import { ref, onMounted, onBeforeUnmount } from 'vue'
 
 const columns: number = 300
 const columnsPerRow: number = 25
@@ -15,7 +15,6 @@ let intervalId: number
 let awardIntervalId: number
 const level = ref<number>(400) // скорость, мс
 
-// Массив для хранения тела змейки
 const snakeBody = ref<number[]>([])
 const initialLength = 3
 
@@ -47,7 +46,6 @@ function stepSnake() {
 
   const next = start.value + step.value
 
-  // проверка столкновений со стенами и самопересечения
   if (
     next < 1 ||
     next > columns ||
@@ -59,10 +57,8 @@ function stepSnake() {
     return
   }
 
-  // обновляем тело: добавляем новую голову
   snakeBody.value.unshift(next)
 
-  // поедание награды
   if (next === award.value) {
     point.value++
     award.value = null
