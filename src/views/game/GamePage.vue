@@ -18,6 +18,10 @@ const level = ref<number>(400) // скорость, мс
 const snakeBody = ref<number[]>([])
 const initialLength = 3
 
+// ===== Свайпы: добавляем переменные для хранения начальных координат касания =====
+let touchStartX = 0
+let touchStartY = 0
+
 function generateStart() {
   const pos = Math.floor(Math.random() * columns) + 1
   start.value = pos
@@ -75,6 +79,8 @@ function stepSnake() {
     award.value = null
     if (level.value > 150) {
       level.value -= 20
+      // Перезапускаем таймер с новой скоростью
+      startSnake()
     }
   } else {
     const maxLen = initialLength + point.value
@@ -105,6 +111,7 @@ function replay() {
   awardGenerate()
 }
 
+// ===== Обработка клавиатуры =====
 function handleKeydown(event: KeyboardEvent) {
   switch (event.key) {
     case 'ArrowUp':
@@ -134,17 +141,59 @@ function handleKeydown(event: KeyboardEvent) {
   }
 }
 
+// ===== Обработка свайпов =====
+function handleTouchStart(event: TouchEvent) {
+  const t = event.touches[0]
+  touchStartX = t.clientX
+  touchStartY = t.clientY
+}
+
+function handleTouchEnd(event: TouchEvent) {
+  const t = event.changedTouches[0]
+  const deltaX = t.clientX - touchStartX
+  const deltaY = t.clientY - touchStartY
+
+  // Минимальный порог для распознавания свайпа
+  if (Math.max(Math.abs(deltaX), Math.abs(deltaY)) < 30) return
+
+  if (Math.abs(deltaX) > Math.abs(deltaY)) {
+    // Горизонтальный свайп
+    if (deltaX > 0 && step.value !== -1) {
+      step.value = 1
+      direction.value = 'right'
+    } else if (deltaX < 0 && step.value !== 1) {
+      step.value = -1
+      direction.value = 'left'
+    }
+  } else {
+    // Вертикальный свайп
+    if (deltaY > 0 && step.value !== -columnsPerRow) {
+      step.value = columnsPerRow
+      direction.value = 'down'
+    } else if (deltaY < 0 && step.value !== columnsPerRow) {
+      step.value = -columnsPerRow
+      direction.value = 'up'
+    }
+  }
+}
+
 onMounted(() => {
   generateStart()
   startSnake()
   awardGenerate()
+
   document.addEventListener('keydown', handleKeydown)
+  document.addEventListener('touchstart', handleTouchStart, { passive: true })
+  document.addEventListener('touchend', handleTouchEnd)
 })
 
 onBeforeUnmount(() => {
   clearInterval(intervalId)
   stopAwardGenerate()
+
   document.removeEventListener('keydown', handleKeydown)
+  document.removeEventListener('touchstart', handleTouchStart)
+  document.removeEventListener('touchend', handleTouchEnd)
 })
 </script>
 
@@ -156,13 +205,13 @@ onBeforeUnmount(() => {
   <section>
     <div class="container">
       <div
-        class="border-3 grid justify-center mx-[9.25px]"
+        class="outline-10 outline-black overflow-hidden grid justify-center mx-[0.5781rem]"
         :style="`grid-template-columns: repeat(${columnsPerRow}, 1fr)`"
       >
         <div
           v-for="col in columns"
           :key="col"
-          class="h-full w-full min-w-10 min-h-10 flex items-center justify-center transition"
+          class="h-full w-full min-w-2 aspect-[1/1] min-h-2 flex items-center justify-center transition"
           :class="{
             'bg-[#3ddb85] rounded-sm': snakeBody.includes(col) && col !== start,
           }"
@@ -183,7 +232,7 @@ onBeforeUnmount(() => {
             v-else-if="col === award"
             src="/src/assets/images/apple.png"
             alt="award"
-            class="w-6 h-6"
+            class="min-w-2 min-h-2 w-full h-full"
           />
         </div>
       </div>
