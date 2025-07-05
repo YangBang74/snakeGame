@@ -144,11 +144,14 @@ onBeforeUnmount(() => {
 
   <section>
     <div class="container">
-      <div class="border-3 flex flex-wrap justify-center mx-[9.25px]">
+      <div
+        class="border-3 grid justify-center mx-[9.25px]"
+        :style="`grid-template-columns: repeat(${columnsPerRow}, 1fr)`"
+      >
         <div
           v-for="col in columns"
           :key="col"
-          class="h-10 w-10 flex items-center justify-center"
+          class="h-full w-full min-w-10 min-h-10 flex items-center justify-center"
           :class="{
             'bg-[#3ddb85] rounded-sm': snakeBody.includes(col) && col !== start,
           }"
