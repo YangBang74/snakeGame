@@ -151,7 +151,7 @@ onBeforeUnmount(() => {
         <div
           v-for="col in columns"
           :key="col"
-          class="h-full w-full min-w-10 min-h-10 flex items-center justify-center"
+          class="h-full w-full min-w-10 min-h-10 flex items-center justify-center transition"
           :class="{
             'bg-[#3ddb85] rounded-sm': snakeBody.includes(col) && col !== start,
           }"
@@ -203,3 +203,19 @@ onBeforeUnmount(() => {
     </div>
   </Teleport>
 </template>
+<style scoped>
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.3s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+
+.fade-enter-to,
+.fade-leave-from {
+  opacity: 1;
+}
+</style>
