@@ -27,7 +27,18 @@ function generateStart() {
 function awardGenerate() {
   awardIntervalId = setInterval(() => {
     if (award.value === null) {
-      award.value = Math.floor(Math.random() * columns) + 1
+      let attempts = 0
+      let newAward = null
+      do {
+        newAward = Math.floor(Math.random() * columns) + 1
+        attempts++
+      } while (snakeBody.value.includes(newAward) && attempts < 100)
+
+      if (!snakeBody.value.includes(newAward)) {
+        award.value = newAward
+      } else {
+        console.log('Свободной клетки не найдено для еды')
+      }
     }
   }, 2000)
 }
